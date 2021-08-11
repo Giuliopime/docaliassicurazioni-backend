@@ -1,0 +1,196 @@
+openapi: 3.0.0
+
+info:
+  title: docaliassicurazioni.it API
+  description: Simple APIs for user authentication and managment for the docaliassicurazioni.it personal area
+  contact:
+    name: API support
+    url: https://github.com/Giuliopime/docali-backend/issues
+  license:
+    name: MIT
+    url: https://choosealicense.com/licenses/mit/
+  version: 1.0.0
+
+servers:
+  - url: https://api.docaliassicurazioni.it/{version}
+    variables:
+      version:
+        default: v1
+
+
+security:
+  - basicAuth: []
+
+paths:
+  /admin/users:
+    get:
+      summary: Get all the users.
+      description: Retrieves the full list of users.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /user/{email}:
+    get:
+      summary: Get a single user.
+      description: Gets a single user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /admin/user/{email}:
+    post:
+      summary: Modify a single user.
+      description: Modify a user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Create a new user.
+      description: Creates a new user (needs to match the provided email parameter).
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      summary: Delete a user.
+      description: Deletes a user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  responses:
+    BadRequest:
+      description: Usually happens when a request body is needed and the body is missing some properties, check for example the User schema.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Request wasn't authorized via basic auth
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Missing permissions for a certain action, some actions like editing or deleting a user can only be made by a user with admin priviliges.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The resource isn't present in the server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  parameters:
+    emailParam:
+      description: The email of a user
+      name: email
+      in: path
+      required: true
+
+  schemas:
+    User:
+      description: A single user entity
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email of the user
+        password:
+          type: string
+          description: The password of the user
+        admin:
+          type: boolean
+          description: Whether the user is an admin of the platform
+        name:
+          type: string
+          description: The legal name of the user
+        surname:
+          type: string
+          description: The legal surname of the user
+        id_code:
+          type: string
+          description: The legal tax ID code ("codice fiscale" in Italy) of the user
+      required:
+        - email
+        - password
+        - admin
+        - name
+        - surname
+        - id_code
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Response code.
+        message:
+          type: string
+          description: Info about the error
+      required:
+        - code
+        - message
