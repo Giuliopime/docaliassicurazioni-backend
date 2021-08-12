@@ -54,7 +54,7 @@ fun Application.main() {
         header(HttpHeaders.ContentType)
 
         host(
-            if(Env.testing) "localhost" else "docaliassicurazioni.it",
+            if(Env.testing) "localhost:3000" else "docaliassicurazioni.it",
             subDomains = listOf("www", "documenti"),
             schemes = listOf("http", "https")
         )
