@@ -5,6 +5,7 @@ val logback_version: String by project
 plugins {
     application
     kotlin("jvm") version "1.5.21"
+    kotlin("plugin.serialization") version "1.5.20"
 }
 
 group = "it.docaliassicurazioni"
@@ -19,6 +20,7 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-sessions:$ktor_version")
     implementation("io.ktor:ktor-serialization:$ktor_version")
     implementation("io.ktor:ktor-server-sessions:$ktor_version")
     implementation("io.ktor:ktor-auth:$ktor_version")
@@ -27,6 +29,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     implementation("org.litote.kmongo:kmongo:4.2.8")
+
+    implementation("redis.clients:jedis:3.6.3")
 
     implementation("io.github.cdimascio:dotenv-kotlin:6.2.2")
 

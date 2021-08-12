@@ -40,7 +40,24 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
-  /user/{email}:
+  /user:
+    get:
+      summary: Gets the logged in user.
+      description: Gets a single user matching the email and password provided via authentication.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /admin/user/{email}:
     get:
       summary: Get a single user.
       description: Gets a single user matching the provided email parameter.
@@ -59,7 +76,6 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
-  /admin/user/{email}:
     post:
       summary: Modify a single user.
       description: Modify a user matching the provided email parameter.
@@ -73,6 +89,8 @@ paths:
       responses:
         "200":
           description: OK
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
