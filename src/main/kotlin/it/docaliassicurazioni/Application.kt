@@ -15,7 +15,7 @@ import io.ktor.sessions.*
 import io.ktor.util.date.*
 import it.docaliassicurazioni.cache.RedisClient
 import it.docaliassicurazioni.data.Error
-import it.docaliassicurazioni.data.UserSessionID
+import it.docaliassicurazioni.data.SessionID
 import it.docaliassicurazioni.database.MongoDBClient
 import it.docaliassicurazioni.v1.routes.v1Routes
 import mu.KotlinLogging
@@ -94,7 +94,7 @@ fun Application.main() {
         }
         */
 
-        session<UserSessionID>("auth-session") {
+        session<SessionID>("auth-session") {
             validate { session ->
                 try {
                     val sessionData = RedisClient.getSession(session.id)
@@ -120,7 +120,7 @@ fun Application.main() {
     }
 
     install(Sessions) {
-        cookie<UserSessionID>("user_session_id")
+        cookie<SessionID>("session_id")
     }
 
     intercept(ApplicationCallPipeline.Monitoring) {
@@ -129,7 +129,7 @@ fun Application.main() {
 
     intercept(ApplicationCallPipeline.Features) {
         if (call.request.path().contains("admin")) {
-            val sessionID = call.sessions.get<UserSessionID>()!!
+            val sessionID = call.sessions.get<SessionID>()!!
             val sessionData = RedisClient.getSession(sessionID.id)
             val user = MongoDBClient.getUser(sessionData.email)
             if (!user.admin) {
@@ -137,7 +137,7 @@ fun Application.main() {
                     HttpStatusCode.Forbidden,
                     Error(
                         HttpStatusCode.Forbidden.description,
-                        "You need admin priviliges to access this route"
+                        "You need admin privileges to access this route."
                     )
                 )
                 return@intercept finish()

@@ -1,10 +1,9 @@
 package it.docaliassicurazioni.data
 
 import io.ktor.auth.*
-import io.ktor.util.date.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserSessionID(
+data class SessionID(
     val id: String
 ): Principal

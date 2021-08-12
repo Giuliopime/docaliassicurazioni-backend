@@ -1,25 +1,24 @@
 package it.docaliassicurazioni.cache
 
-import it.docaliassicurazioni.data.UserSessionData
+import it.docaliassicurazioni.data.SessionData
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import redis.clients.jedis.JedisPool
-import kotlin.jvm.Throws
 
 object RedisClient {
     private val client = JedisPool()
     private val sessionsHashName = "sessions"
 
     @Throws(NoSuchElementException::class)
-    fun getSession(id: String): UserSessionData {
+    fun getSession(id: String): SessionData {
         client.resource.use {
             val json = it.hget(sessionsHashName, id) ?: throw NoSuchElementException()
             return Json.decodeFromString(json)
         }
     }
 
-    fun createSession(session: UserSessionData) {
+    fun createSession(session: SessionData) {
         client.resource.use {
             it.hset(sessionsHashName, session.id, Json.encodeToString(session))
         }

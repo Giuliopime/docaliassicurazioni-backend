@@ -6,7 +6,6 @@ import it.docaliassicurazioni.Env
 import it.docaliassicurazioni.data.User
 import mu.KotlinLogging
 import org.litote.kmongo.*
-import kotlin.jvm.Throws
 
 private val logger = KotlinLogging.logger {}
 

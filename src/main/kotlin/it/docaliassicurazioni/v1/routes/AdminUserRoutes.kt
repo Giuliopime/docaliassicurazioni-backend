@@ -1,7 +1,6 @@
 package it.docaliassicurazioni.v1.routes
 
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*

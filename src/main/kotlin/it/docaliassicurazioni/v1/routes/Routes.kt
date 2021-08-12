@@ -10,9 +10,9 @@ import io.ktor.sessions.*
 import io.ktor.util.date.*
 import it.docaliassicurazioni.cache.RedisClient
 import it.docaliassicurazioni.data.Error
+import it.docaliassicurazioni.data.SessionData
+import it.docaliassicurazioni.data.SessionID
 import it.docaliassicurazioni.data.UserLoginData
-import it.docaliassicurazioni.data.UserSessionData
-import it.docaliassicurazioni.data.UserSessionID
 import it.docaliassicurazioni.database.MongoDBClient
 
 fun Application.v1Routes() {
@@ -31,14 +31,16 @@ fun Application.v1Routes() {
                         )
                     )
 
-                val userSession = UserSessionID(generateSessionId())
-                val userSessionData = UserSessionData(
-                    userSession.id,
+                val sessionID = SessionID(generateSessionId())
+
+                val sessionData = SessionData(
+                    sessionID.id,
                     user.email,
                     getTimeMillis()
                 )
-                RedisClient.createSession(userSessionData)
-                call.sessions.set(userSession)
+                RedisClient.createSession(sessionData)
+
+                call.sessions.set(sessionID)
 
                 call.respond(HttpStatusCode.OK)
             }
