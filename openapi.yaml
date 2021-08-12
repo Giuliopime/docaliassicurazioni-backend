@@ -16,12 +16,38 @@ servers:
     variables:
       version:
         default: v1
+  - url: http://localhost:12000/{version}
+    description: Just for testing purpouses.
+    variables:
+      version:
+        default: v1
 
 
 security:
-  - basicAuth: []
+  - cookieAuth: []
 
 paths:
+  /login:
+    post:
+      summary: Used to login.
+      description: Receives login in credentials and sends back a session cookie.
+      security: []
+      requestBody:
+        required: true
+        description: JSON containing email and password of the user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginData'
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /admin/users:
     get:
       summary: Get all the users.
@@ -44,8 +70,6 @@ paths:
     get:
       summary: Gets the logged in user.
       description: Gets a single user matching the email and password provided via authentication.
-      parameters:
-        - $ref: "#/components/parameters/emailParam"
       responses:
         "200":
           description: OK
@@ -134,9 +158,10 @@ paths:
 
 components:
   securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: user_session_id
   responses:
     BadRequest:
       description: Usually happens when a request body is needed and the body is missing some properties, check for example the User schema.
@@ -171,8 +196,22 @@ components:
       required: true
 
   schemas:
+    UserLoginData:
+      description: Email and password of a user.
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email of the user
+        password:
+          type: string
+          description:
+            The password of the user
+      required:
+        - email
+        - password
     User:
-      description: A single user entity
+      description: A single user entity.
       type: object
       properties:
         email:

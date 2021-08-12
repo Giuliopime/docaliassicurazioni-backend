@@ -19,7 +19,7 @@ fun Route.adminUserRoutes() {
         get {
             val email = call.parameters["email"]!!
             val user = MongoDBClient.getUser(email)
-            call.respond(user)
+            call.respond(HttpStatusCode.OK, user)
         }
 
         post {

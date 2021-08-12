@@ -1,18 +1,19 @@
 package it.docaliassicurazioni.v1.routes
 
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import it.docaliassicurazioni.data.Error
-import it.docaliassicurazioni.data.UserSession
+import io.ktor.sessions.*
+import it.docaliassicurazioni.cache.RedisClient
+import it.docaliassicurazioni.data.UserSessionID
 import it.docaliassicurazioni.database.MongoDBClient
 
 fun Route.userRoute() {
     get("/user") {
-        val email = call.principal<UserSession>()!!.email
-        val user = MongoDBClient.getUser(email)
-        call.respond(user)
+        val sessionID = call.sessions.get<UserSessionID>()!!.id
+        val sessionData = RedisClient.getSession(sessionID)
+        val user = MongoDBClient.getUser(sessionData.email)
+        call.respond(HttpStatusCode.OK, user)
     }
 }

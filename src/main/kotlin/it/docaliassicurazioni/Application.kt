@@ -1,9 +1,12 @@
 package it.docaliassicurazioni
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
+import io.ktor.request.*
 import io.ktor.request.ContentTransformationException
 import io.ktor.response.*
 import io.ktor.serialization.*
@@ -12,17 +15,24 @@ import io.ktor.sessions.*
 import io.ktor.util.date.*
 import it.docaliassicurazioni.cache.RedisClient
 import it.docaliassicurazioni.data.Error
-import it.docaliassicurazioni.data.UserSession
+import it.docaliassicurazioni.data.UserSessionID
 import it.docaliassicurazioni.database.MongoDBClient
 import it.docaliassicurazioni.v1.routes.v1Routes
 import mu.KotlinLogging
+import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 
-fun main(args: Array<String>) = EngineMain.main(args)
+fun main(args: Array<String>) {
+    val loggerContext: LoggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
+    loggerContext.getLogger("org.mongodb.driver").level = Level.WARN
 
-fun shutdown(reason: String) {
+    MongoDBClient
+    EngineMain.main(args)
+}
+
+fun shutdown(reason: String): Nothing {
     logger.warn("Shutting down, reason:\n$reason")
     exitProcess(1)
 }
@@ -30,6 +40,24 @@ fun shutdown(reason: String) {
 fun Application.main() {
     install(ContentNegotiation) {
         json()
+    }
+
+    install(CORS) {
+        method(HttpMethod.Get)
+        method(HttpMethod.Post)
+        method(HttpMethod.Put)
+        method(HttpMethod.Delete)
+
+        header(HttpHeaders.Accept)
+        header(HttpHeaders.AcceptLanguage)
+        header(HttpHeaders.ContentLanguage)
+        header(HttpHeaders.ContentType)
+
+        host(
+            if(Env.testing) "localhost" else "docaliassicurazioni.it",
+            subDomains = listOf("www", "documenti"),
+            schemes = listOf("http", "https")
+        )
     }
 
     install(StatusPages) {
@@ -48,9 +76,10 @@ fun Application.main() {
     }
 
     install(Authentication) {
-        form("auth-form") {
-            userParamName = "email"
-            passwordParamName = "password"
+        /* When nuxtjs auth module will support basic auth I'll be able to use this
+        basic("auth-basic") {
+
+            realm = "Access to the '/login' path"
             validate { credentials ->
                 try {
                     val user = MongoDBClient.getUser(credentials.name)
@@ -63,41 +92,13 @@ fun Application.main() {
                 }
             }
         }
+        */
 
-        session<UserSession>("auth-session-admin") {
+        session<UserSessionID>("auth-session") {
             validate { session ->
                 try {
-                    val storedSession = RedisClient.getSession(session.id)
-                    if (getTimeMillis() - storedSession.creationTimestamp >= 86400000) {
-                        RedisClient.deleteSession(session.id)
-                        null
-                    } else {
-                        val user = MongoDBClient.getUser(storedSession.email)
-                        if (user.admin)
-                            session
-                        else
-                            null
-                    }
-                } catch (e: NoSuchElementException) {
-                    null
-                }
-            }
-            challenge {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    Error(
-                        HttpStatusCode.Unauthorized.toString(),
-                        "Session expired, use the /login route to get a new one."
-                    )
-                )
-            }
-        }
-
-        session<UserSession>("auth-session") {
-            validate { session ->
-                try {
-                    val storedSession = RedisClient.getSession(session.id)
-                    if (getTimeMillis() - storedSession.creationTimestamp >= 86400000) {
+                    val sessionData = RedisClient.getSession(session.id)
+                    if (getTimeMillis() - sessionData.creationTimestamp >= 86400000) {
                         RedisClient.deleteSession(session.id)
                         null
                     } else
@@ -119,7 +120,29 @@ fun Application.main() {
     }
 
     install(Sessions) {
-        cookie<UserSession>("user_session")
+        cookie<UserSessionID>("user_session_id")
+    }
+
+    intercept(ApplicationCallPipeline.Monitoring) {
+        logger.info("Request received on route ${call.request.path()}")
+    }
+
+    intercept(ApplicationCallPipeline.Features) {
+        if (call.request.path().contains("admin")) {
+            val sessionID = call.sessions.get<UserSessionID>()!!
+            val sessionData = RedisClient.getSession(sessionID.id)
+            val user = MongoDBClient.getUser(sessionData.email)
+            if (!user.admin) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    Error(
+                        HttpStatusCode.Forbidden.description,
+                        "You need admin priviliges to access this route"
+                    )
+                )
+                return@intercept finish()
+            }
+        }
     }
 
     v1Routes()

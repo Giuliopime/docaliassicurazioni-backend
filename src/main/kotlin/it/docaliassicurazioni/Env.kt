@@ -5,14 +5,19 @@ import io.github.cdimascio.dotenv.dotenv
 object Env {
     private val dotenv = dotenv()
 
-    val dbName = get("db.name")
+    val testing
+        get () = getBoolean("testing")
 
-    private fun get(key: String): String {
-        val value = dotenv[key.replace(".", "_").uppercase()]
+    val dbName
+        get () = get("db.name")
+    val initAdminEmail
+        get () = get("init.admin.email")
+    val initAdminPassword
+        get () = get("init.admin.password")
 
-        if (value == null)
-            shutdown("Missing .env key: $key")
+    private fun get(key: String): String = dotenv[key.replace(".", "_").uppercase()]
+        ?: shutdown("Missing .env key: $key")
 
-        return value
-    }
+    private fun getBoolean(key: String): Boolean = get(key).toBooleanStrictOrNull()
+        ?: shutdown("Missing .env boolean key: $key")
 }

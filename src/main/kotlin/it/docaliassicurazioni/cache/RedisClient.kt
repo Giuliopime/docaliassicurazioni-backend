@@ -1,6 +1,6 @@
 package it.docaliassicurazioni.cache
 
-import it.docaliassicurazioni.data.UserSession
+import it.docaliassicurazioni.data.UserSessionData
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -12,14 +12,14 @@ object RedisClient {
     private val sessionsHashName = "sessions"
 
     @Throws(NoSuchElementException::class)
-    fun getSession(id: String): UserSession {
+    fun getSession(id: String): UserSessionData {
         client.resource.use {
             val json = it.hget(sessionsHashName, id) ?: throw NoSuchElementException()
             return Json.decodeFromString(json)
         }
     }
 
-    fun createSession(session: UserSession) {
+    fun createSession(session: UserSessionData) {
         client.resource.use {
             it.hset(sessionsHashName, session.id, Json.encodeToString(session))
         }
