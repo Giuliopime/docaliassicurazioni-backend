@@ -1,11 +1,15 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 
 plugins {
-    application
+    id("application")
     kotlin("jvm") version "1.5.21"
     kotlin("plugin.serialization") version "1.5.20"
+
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group = "it.docaliassicurazioni"
@@ -34,6 +38,26 @@ dependencies {
 
     implementation("io.github.cdimascio:dotenv-kotlin:6.2.2")
 
-    implementation("io.github.microutils:kotlin-logging:1.12.5")
+    implementation("io.github.microutils:kotlin-logging:2.0.10")
+}
 
+tasks {
+    withType(JavaCompile::class) {
+        options.encoding = "UTF-8"
+    }
+    withType(KotlinCompile::class) {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    shadowJar {
+        archiveFileName.set("docali-backend.jar")
+    }
+}
+
+tasks {
+    build {
+        dependsOn(shadowJar)
+    }
 }

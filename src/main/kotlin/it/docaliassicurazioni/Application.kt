@@ -47,7 +47,6 @@ fun Application.main() {
         method(HttpMethod.Post)
         method(HttpMethod.Put)
         method(HttpMethod.Delete)
-
         header(HttpHeaders.Accept)
         header(HttpHeaders.AcceptLanguage)
         header(HttpHeaders.ContentLanguage)
