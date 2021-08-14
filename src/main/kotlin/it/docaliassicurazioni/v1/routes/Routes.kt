@@ -46,7 +46,7 @@ fun Application.v1Routes() {
             }
 
             authenticate("auth-session") {
-                userRoute()
+                userRoutes()
                 adminUserRoutes()
             }
         }

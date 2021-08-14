@@ -24,17 +24,16 @@ object MongoDBClient {
                 Env.initAdminEmail,
                 Env.initAdminPassword,
                 true,
-                "initial admin",
-                "initial admin",
-                "initial_admin"
+                "Docali",
+                "Agenzia",
+                "admin_iniziale"
             ))
         }
     }
 
     @Throws(NoSuchElementException::class)
-    fun getUser(email: String) = usersCollection.findOne(User::email eq email)
+    fun getUser(email: String): User = usersCollection.findOne(User::email eq email)
         ?: throw NoSuchElementException()
-
 
     fun getAllUsers(): List<User> = usersCollection.find().toList()
 

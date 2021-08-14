@@ -81,6 +81,15 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+  /logout:
+    get:
+      summary: Logs out the current logged in user.
+      description: Terminates the session of the user resulting in a logout.
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /admin/user/{email}:
     get:
       summary: Get a single user.
@@ -140,6 +149,8 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "405":
+          $ref: "#/components/responses/NotAllowed"
     delete:
       summary: Delete a user.
       description: Deletes a user matching the provided email parameter.
@@ -183,6 +194,12 @@ components:
             $ref: "#/components/schemas/Error"
     NotFound:
       description: The resource isn't present in the server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotAllowed:
+      description: The method is not allowed, for example when trying to create a user and a user with the same email already exists.
       content:
         application/json:
           schema:

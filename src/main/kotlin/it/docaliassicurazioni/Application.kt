@@ -53,6 +53,8 @@ fun Application.main() {
         header(HttpHeaders.ContentLanguage)
         header(HttpHeaders.ContentType)
 
+        allowCredentials = true
+
         host(
             if(Env.testing) "localhost:3000" else "docaliassicurazioni.it",
             subDomains = listOf("www", "documenti"),
@@ -98,6 +100,7 @@ fun Application.main() {
             validate { session ->
                 try {
                     val sessionData = RedisClient.getSession(session.id)
+                    // TODO: check user in database
                     if (getTimeMillis() - sessionData.creationTimestamp >= 86400000) {
                         RedisClient.deleteSession(session.id)
                         null

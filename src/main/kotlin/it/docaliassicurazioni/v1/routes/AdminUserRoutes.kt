@@ -8,6 +8,7 @@ import io.ktor.routing.*
 import it.docaliassicurazioni.data.Error
 import it.docaliassicurazioni.data.User
 import it.docaliassicurazioni.database.MongoDBClient
+import kotlin.NoSuchElementException
 
 fun Route.adminUserRoutes() {
     get("/admin/users") {
@@ -40,6 +41,17 @@ fun Route.adminUserRoutes() {
                 call.respond(HttpStatusCode.BadRequest, Error(HttpStatusCode.BadRequest.toString(), "The email parameter and the email property in the request body don't match."))
                 return@put
             }
+
+            try {
+                MongoDBClient.getUser(email)
+                return@put call.respond(
+                    HttpStatusCode.MethodNotAllowed,
+                    Error(
+                        HttpStatusCode.MethodNotAllowed.description,
+                        "A user with that email already exists"
+                    )
+                )
+            } catch (ignored: NoSuchElementException) {}
 
             MongoDBClient.createUser(newUser)
             call.respond(HttpStatusCode.OK)
