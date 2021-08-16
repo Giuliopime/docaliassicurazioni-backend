@@ -48,24 +48,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
-  /admin/users:
-    get:
-      summary: Get all the users.
-      description: Retrieves the full list of users.
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
   /user:
     get:
       summary: Gets the logged in user.
@@ -90,6 +72,39 @@ paths:
           description: OK
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /files/{id}:
+    get:
+      summary: Gets a file.
+      description: Gets a specific file of the current logged in user.
+      parameters:
+        - $ref: "#/components/parameters/idParam"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+
+  /admin/users:
+    get:
+      summary: Get all the users.
+      description: Retrieves the full list of users.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
   /admin/user/{email}:
     get:
       summary: Get a single user.
@@ -166,6 +181,81 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /admin/user/{email}/files/{id}:
+    get:
+      summary: Gets a single file.
+      description: Gets a single file of the user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+        - $ref: "#/components/parameters/idParam"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      summary: Modify a file name.
+      description: Modify a file name of the user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+        - $ref: "#/components/parameters/idParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewFileInfo"
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Deletes a file.
+      description: Deletes a file of a user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+        - $ref: "#/components/parameters/idParam"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /admin/user/{email}/files:
+    put:
+      summary: Create a new file.
+      description: Creates a new file for a user matching the provided email parameter.
+      parameters:
+        - $ref: "#/components/parameters/emailParam"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type:  object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
 components:
   securitySchemes:
@@ -207,8 +297,13 @@ components:
 
   parameters:
     emailParam:
-      description: The email of a user
+      description: The email of a user.
       name: email
+      in: path
+      required: true
+    idParam:
+      description: id of an entity, like files for example.
+      name: id
       in: path
       required: true
 
@@ -256,6 +351,15 @@ components:
         - name
         - surname
         - id_code
+    NewFileInfo:
+      description: New informations for an existing file.
+      type: object
+      properties:
+        new_name:
+          type: string
+          description: New name for the file.
+      required:
+        - new_name
     Error:
       type: object
       properties:
