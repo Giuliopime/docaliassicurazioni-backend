@@ -2,12 +2,16 @@ package it.docaliassicurazioni.v1.routes
 
 import io.ktor.application.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import it.docaliassicurazioni.data.Error
-import it.docaliassicurazioni.data.User
+import io.ktor.sessions.*
+import it.docaliassicurazioni.cache.RedisClient
+import it.docaliassicurazioni.data.*
 import it.docaliassicurazioni.database.MongoDBClient
+import java.io.File
+import java.util.*
 import kotlin.NoSuchElementException
 
 fun Route.adminUserRoutes() {
@@ -61,6 +65,114 @@ fun Route.adminUserRoutes() {
             val email = call.parameters["email"]!!
             MongoDBClient.deleteUser(email)
             call.respond(HttpStatusCode.OK)
+        }
+
+        route("/files") {
+            get("/{id}") {
+                val email = call.parameters["email"]!!
+                val user = MongoDBClient.getUser(email)
+
+                val fileID = call.parameters["id"]!!
+                val fileData = user.files.firstOrNull { it.id == fileID }
+                    ?: return@get call.respond(
+                        HttpStatusCode.NotFound,
+                        Error(
+                            HttpStatusCode.NotFound.description,
+                            "File with ID $fileID not found for user $email."
+                        )
+                    )
+
+
+                val file = File("files/${fileData.id}")
+
+                if (!file.exists())
+                    return@get call.respond(
+                        HttpStatusCode.NotFound,
+                        Error(
+                            HttpStatusCode.NotFound.description,
+                            "File with ID $fileID not found for user $email."
+                        )
+                    )
+
+
+                call.response.header(
+                    HttpHeaders.ContentDisposition,
+                    ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, fileData.name)
+                        .toString()
+                )
+                call.respondFile(file)
+            }
+
+            post("/{id}") {
+                val newFileInfo = call.receive<RenameFileInfo>()
+
+                val email = call.parameters["email"]!!
+                val user = MongoDBClient.getUser(email)
+
+                val fileID = call.parameters["id"]!!
+                val fileData = user.files.firstOrNull { it.id == fileID }
+                    ?: return@post call.respond(
+                        HttpStatusCode.NotFound,
+                        Error(
+                            HttpStatusCode.NotFound.description,
+                            "File with ID $fileID not found for user $email."
+                        )
+                    )
+
+                fileData.name = newFileInfo.new_name
+                MongoDBClient.updateUser(user)
+
+                call.respond(HttpStatusCode.OK)
+            }
+
+            put {
+                val email = call.parameters["email"]!!
+                val user = MongoDBClient.getUser(email)
+
+                var fileName: String
+                val multipartData = call.receiveMultipart()
+
+                multipartData.forEachPart { part ->
+                    if (part is PartData.FileItem) {
+                        fileName = part.originalFileName as String
+                        var fileBytes = part.streamProvider().readBytes()
+                        File("files/$fileName").writeBytes(fileBytes)
+
+                        user.files.add(FileInfo(
+                            UUID.randomUUID().toString(),
+                            fileName
+                        ))
+                    }
+                }
+
+                MongoDBClient.updateUser(user)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            delete("/{id}") {
+                val email = call.parameters["email"]!!
+                val user = MongoDBClient.getUser(email)
+
+                val fileID = call.parameters["id"]!!
+                val fileIndex = user.files.indexOfFirst { it.id == fileID }
+                if (fileIndex == -1)
+                    return@delete call.respond(
+                        HttpStatusCode.NotFound,
+                        Error(
+                            HttpStatusCode.NotFound.description,
+                            "File with ID $fileID not found for user $email."
+                        )
+                    )
+
+                val file = File("files/${fileID}")
+                if (file.exists())
+                    file.delete()
+
+                user.files.removeAt(fileIndex)
+                MongoDBClient.updateUser(user)
+
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

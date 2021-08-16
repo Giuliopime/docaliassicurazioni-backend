@@ -20,6 +20,9 @@ import it.docaliassicurazioni.database.MongoDBClient
 import it.docaliassicurazioni.v1.routes.v1Routes
 import mu.KotlinLogging
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
@@ -29,6 +32,9 @@ fun main(args: Array<String>) {
     loggerContext.getLogger("org.mongodb.driver").level = Level.WARN
 
     MongoDBClient
+
+    Files.createDirectory(Path("/files"))
+
     EngineMain.main(args)
 }
 
@@ -55,7 +61,7 @@ fun Application.main() {
         allowCredentials = true
 
         host(
-            if(Env.testing) "localhost:3000" else "docaliassicurazioni.it",
+            if(Env.testing) "localhost:3000" else "78.47.162.112",
             subDomains = listOf("www", "documenti"),
             schemes = listOf("http", "https")
         )

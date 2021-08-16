@@ -9,5 +9,17 @@ data class User(
     val admin: Boolean,
     val name: String,
     val surname: String,
-    val id_code: String
+    val id_code: String,
+    val files: MutableList<FileInfo> = mutableListOf()
+)
+
+@Serializable
+data class FileInfo(
+    val id: String,
+    var name: String
+)
+
+@Serializable
+data class RenameFileInfo(
+    val new_name: String
 )
