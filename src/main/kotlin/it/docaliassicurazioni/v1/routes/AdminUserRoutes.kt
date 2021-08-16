@@ -129,17 +129,17 @@ fun Route.adminUserRoutes() {
                 val email = call.parameters["email"]!!
                 val user = MongoDBClient.getUser(email)
 
-                var fileName: String
                 val multipartData = call.receiveMultipart()
 
                 multipartData.forEachPart { part ->
                     if (part is PartData.FileItem) {
-                        fileName = part.originalFileName as String
+                        val fileName = part.originalFileName as String
+                        val fileID = UUID.randomUUID().toString()
                         var fileBytes = part.streamProvider().readBytes()
-                        File("files/$fileName").writeBytes(fileBytes)
+                        File("files/${fileID}.${fileName.substringAfterLast('.', "txt")}").writeBytes(fileBytes)
 
                         user.files.add(FileInfo(
-                            UUID.randomUUID().toString(),
+                            fileID,
                             fileName
                         ))
                     }
