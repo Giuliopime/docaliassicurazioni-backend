@@ -41,7 +41,7 @@ fun Route.userRoutes() {
                 )
             )
 
-        val file = File("files/${fileData.id}")
+        val file = File("files/${fileData.id}.${fileData.name.substringAfterLast('.', "txt")}")
         println(file.absolutePath)
 
         if (!file.exists())

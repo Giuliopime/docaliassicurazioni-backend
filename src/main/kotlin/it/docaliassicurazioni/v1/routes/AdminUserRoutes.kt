@@ -82,8 +82,7 @@ fun Route.adminUserRoutes() {
                         )
                     )
 
-
-                val file = File("files/${fileData.id}")
+                val file = File("files/${fileData.id}.${fileData.name.substringAfterLast('.', "txt")}")
 
                 if (!file.exists())
                     return@get call.respond(
@@ -93,7 +92,6 @@ fun Route.adminUserRoutes() {
                             "File with ID $fileID not found for user $email."
                         )
                     )
-
 
                 call.response.header(
                     HttpHeaders.ContentDisposition,
@@ -164,7 +162,7 @@ fun Route.adminUserRoutes() {
                         )
                     )
 
-                val file = File("files/${fileID}")
+                val file = File("files/${fileID}.${user.files[fileIndex].name.substringAfterLast('.', "txt")}")
                 if (file.exists())
                     file.delete()
 

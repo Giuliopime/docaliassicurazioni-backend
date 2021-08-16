@@ -33,7 +33,9 @@ fun main(args: Array<String>) {
 
     MongoDBClient
 
-    Files.createDirectory(Path("/files"))
+    val filesFolder = File("files")
+    if (!filesFolder.exists())
+        filesFolder.mkdir()
 
     EngineMain.main(args)
 }
@@ -61,7 +63,7 @@ fun Application.main() {
         allowCredentials = true
 
         host(
-            if(Env.testing) "localhost:3000" else "78.47.162.112",
+            if(Env.testing) "localhost:3000" else "78.47.162.112:80",
             subDomains = listOf("www", "documenti"),
             schemes = listOf("http", "https")
         )
