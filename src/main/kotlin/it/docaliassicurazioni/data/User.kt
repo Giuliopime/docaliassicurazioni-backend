@@ -10,7 +10,8 @@ data class User(
     val name: String,
     val surname: String,
     val id_code: String,
-    val files: MutableList<FileInfo> = mutableListOf()
+    val files: MutableList<FileInfo> = mutableListOf(),
+    val redirect: String? = null,
 )
 
 @Serializable
