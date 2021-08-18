@@ -63,8 +63,8 @@ fun Application.main() {
         allowCredentials = true
 
         host(
-            if(Env.testing) "localhost:3000" else "78.47.162.112:80",
-            subDomains = listOf("www", "documenti"),
+            if(Env.testing) "localhost:3000" else "giuliopime.dev",
+            subDomains = listOf("www", "documenti", "docali"),
             schemes = listOf("http", "https")
         )
     }

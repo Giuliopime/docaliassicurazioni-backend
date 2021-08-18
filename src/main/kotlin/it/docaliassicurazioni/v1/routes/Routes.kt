@@ -17,7 +17,7 @@ import it.docaliassicurazioni.database.MongoDBClient
 
 fun Application.v1Routes() {
     routing {
-        route("/v1") {
+        route("/api/v1") {
 
             post("/login") {
                 val userLoginData = call.receive<UserLoginData>()
