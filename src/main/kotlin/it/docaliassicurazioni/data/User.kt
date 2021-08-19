@@ -15,6 +15,12 @@ data class User(
 )
 
 @Serializable
+data class ChangePasswordInfo(
+    val old_password: String,
+    val new_password: String,
+)
+
+@Serializable
 data class FileInfo(
     val id: String,
     var name: String

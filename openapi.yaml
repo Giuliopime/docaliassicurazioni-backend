@@ -63,6 +63,26 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+  /changePassword:
+    post:
+      summary: Changes your password.
+      description: Allows the logged in user to change its password.
+      requestBody:
+        required: true
+        description: JSON containing old and new password of the user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordInfo'
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /logout:
     get:
       summary: Logs out the current logged in user.
@@ -351,6 +371,19 @@ components:
         - name
         - surname
         - id_code
+    NewPasswordInfo:
+      description: Old and new password for password change.
+      type: object
+      properties:
+        old_password:
+          type: string
+          description: Old password of the user.
+        new_password:
+          type: string
+          description: New password of the user.
+      required:
+        - old_password
+        - new_password
     NewFileInfo:
       description: New informations for an existing file.
       type: object
