@@ -34,7 +34,7 @@ fun Route.userRoutes() {
 
         val passwordInfo = call.receive<ChangePasswordInfo>()
 
-        if (user.password !== passwordInfo.old_password) {
+        if (user.password != passwordInfo.old_password) {
             return@post call.respond(
                 HttpStatusCode.Unauthorized,
                 Error(
@@ -44,12 +44,14 @@ fun Route.userRoutes() {
             )
         }
 
-        if (!passwordInfo.new_password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}\$"))) {
+        val newPassword = passwordInfo.new_password
+
+        if (newPassword.length < 8 || newPassword.length > 50 || !newPassword.contains(Regex("\\d")) || !newPassword.contains(Regex("[a-zA-Z]"))) {
             return@post call.respond(
                 HttpStatusCode.BadRequest,
                 Error(
                     HttpStatusCode.BadRequest.description,
-                    "The new password must contain at least one number, one uppercase letter and one lowercase letter, and it must be at least 8 characters long."
+                    "The new password must contain at least one number, one letter, and it must be at least 8 characters long."
                 )
             )
         }
