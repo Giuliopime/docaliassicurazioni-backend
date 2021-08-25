@@ -15,6 +15,9 @@ object Env {
     val initAdminPassword
         get () = get("init.admin.password")
 
+    val mailersendApiToken
+        get () = get("mailersend.api.token")
+
     private fun get(key: String): String = dotenv[key.replace(".", "_").uppercase()]
         ?: shutdown("Missing .env key: $key")
 

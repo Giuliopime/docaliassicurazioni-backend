@@ -8,6 +8,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.sessions.*
 import io.ktor.util.date.*
+import it.docaliassicurazioni.MailerSendInteractor
+import it.docaliassicurazioni.cache.EmailsCache
 import it.docaliassicurazioni.cache.RedisClient
 import it.docaliassicurazioni.data.Error
 import it.docaliassicurazioni.data.SessionData
@@ -42,6 +44,24 @@ fun Application.v1Routes() {
 
                 call.sessions.set(sessionID)
 
+                call.respond(HttpStatusCode.OK)
+            }
+
+            get("/forgotPassword/{email}") {
+                val email = call.parameters["email"]!!
+                val user = MongoDBClient.getUser(email)
+
+                if (EmailsCache.onCooldown(user.email)) {
+                    return@get call.respond(
+                        HttpStatusCode.TooManyRequests,
+                        Error(
+                            HttpStatusCode.TooManyRequests.description,
+                            "Wait at least ten minutes to call this endpoint again."
+                        )
+                    )
+                }
+
+                MailerSendInteractor.sendForgottenPasswordEmail(user)
                 call.respond(HttpStatusCode.OK)
             }
 
