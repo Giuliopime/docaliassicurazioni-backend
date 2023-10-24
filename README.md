@@ -12,7 +12,7 @@ I initially built it for an insurance Agency back in 2021 as you might notice fr
 
 ## [Backend](https://github.com/Giuliopime/docs-drive-backend)
 The backend api is built with Ktor, and uses Redis, MongoDB and the local file system for storage (yes I didn't know S3 existed back then).  
-It uses OpenApi for documentation and the whole thing was deployed on a simple Aruba VPS.  
+It uses OpenApi (see [here](https://giuliopime.github.io/docs-drive-backend/) even though it's not great as it's missing tags and other stuff) for documentation and the whole thing was deployed on a simple Aruba VPS.  
 
 ## [Frontend](https://github.com/Giuliopime/docs-drive-frontend)  
 The frontend is an SSR NuxtJS v2 application.  
