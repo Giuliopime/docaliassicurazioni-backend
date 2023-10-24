@@ -1,18 +1,18 @@
 openapi: 3.0.0
 
 info:
-  title: docaliassicurazioni.it API
-  description: Simple APIs for user authentication and managment for the docaliassicurazioni.it personal area
+  title: docs-drive.it API
+  description: Simple APIs for user authentication and management for the docs-drive.it personal area
   contact:
     name: API support
-    url: https://github.com/Giuliopime/docali-backend/issues
+    url: https://github.com/Giuliopime/docs-drive-backend/issues
   license:
     name: MIT
     url: https://choosealicense.com/licenses/mit/
   version: 1.0.0
 
 servers:
-  - url: https://api.docaliassicurazioni.it/{version}
+  - url: https://api.docs-drive.it/{version}
     variables:
       version:
         default: v1
